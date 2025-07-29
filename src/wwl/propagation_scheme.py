@@ -178,36 +178,62 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
         
         return adj_cur
 
-    def fit_transform(self, X: List[ig.Graph], node_features = None, num_iterations: int=3):
+    def fit_transform(self, X: List[ig.Graph], node_features = None, edge_weight = None, num_iterations: int=3):
         """
         Transform a list of graphs into their node representations. 
         Node features should be provided as a numpy array.
         """
         node_features_labels, adj_mat, n_nodes = self._preprocess_graphs(X)
-        if node_features is None:
-            node_features = node_features_labels
+        # if node_features is None:
+        #     node_features = node_features_labels
 
-        node_features_data = scale(np.concatenate(node_features, axis=0), axis = 0)
-        splits_idx = np.cumsum(n_nodes).astype(int)
-        node_features_split = np.vsplit(node_features_data,splits_idx)		
-        node_features = node_features_split[:-1]
+        # node_features_data = scale(np.concatenate(node_features, axis=0), axis = 0)
+        # splits_idx = np.cumsum(n_nodes).astype(int)
+        # #print(node_features_data,splits_idx)
+        # node_features_split = np.vsplit(node_features_data,splits_idx)		
+        # node_features = node_features_split[:-1]
 
         # Generate the label sequences for h iterations
         n_graphs = len(node_features)
         self._label_sequences = []
         for i in range(n_graphs):
+            graph_feat_dict = []
             graph_feat = []
 
             for it in range(num_iterations+1):
                 if it == 0:
-                    graph_feat.append(node_features[i])
+                    graph_feat_dict.append(node_features[i])
+                    graph_feat.append([node_features[i][key] for key in sorted(node_features[i].keys())])
                 else:
                     adj_cur = adj_mat[i]+np.identity(adj_mat[i].shape[0])
                     adj_cur = self._create_adj_avg(adj_cur)
 
                     np.fill_diagonal(adj_cur, 0)
-                    graph_feat_cur = 0.5*(np.dot(adj_cur, graph_feat[it-1]) + graph_feat[it-1])
-                    graph_feat.append(graph_feat_cur)
 
-            self._label_sequences.append(np.concatenate(graph_feat, axis = 1))
+                    graph_feat_cur_dict = {}
+                    for v in X[i].vs: # to get the vertex sequence of the graph
+                        neigh_v = X[i].neighbors(v) # if doesn't work, try ig.neighbors
+
+                        weight_prime_neigh_v = 0
+                        for u in neigh_v:
+                            print(edge_weight[i])
+                            weight_prime_neigh_v += 1 / edge_weight[i][(int(X[i].vs[u]["_nx_name"]), int(v["_nx_name"]))] # since edge weight is a list of dict where the key is a tuple
+
+                        sum_of_weighted_edge_neigh = 0
+                        for u in neigh_v:
+                            #print(f'i: {i}')
+                            #print(f'u: {int(X[i].vs[u]["_nx_name"])}')
+                            sum_of_weighted_edge_neigh += 1/ edge_weight[i][(int(X[i].vs[u]["_nx_name"]), int(v["_nx_name"]))]*graph_feat_dict[it-1][int(X[i].vs[u]["_nx_name"])] # node feature of vertext u at iteration i
+
+                        graph_feat_v = 0.5*(graph_feat_dict[it-1][int(v["_nx_name"])] + 1 / weight_prime_neigh_v * sum_of_weighted_edge_neigh) # only 1 vertex
+                        #graph_feat_cur = 0.5*(np.dot(adj_cur, graph_feat[it-1]) + graph_feat[it-1])
+                        #graph_feat_cur.append(graph_feat_v) # one graph feature
+                        graph_feat_cur_dict[int(v["_nx_name"])] = graph_feat_v
+                    graph_feat_dict.append(graph_feat_cur_dict)
+                    graph_feat.append([graph_feat_cur_dict[key] for key in sorted(graph_feat_cur_dict.keys())])
+
+            print(graph_feat)
+            self._label_sequences.append(np.transpose(graph_feat))
+            #print(self._label_sequences)
+            #self._label_sequences.append(graph_feat) # this is a list of list of dict
         return self._label_sequences

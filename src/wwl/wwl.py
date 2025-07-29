@@ -37,6 +37,25 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
             labels_2 = label_sequences[graph_index_2 + graph_index_1]
             # Get cost matrix
             ground_distance = 'hamming' if categorical else 'euclidean'
+
+            # # labels 1 and 2 are two separate dicts, convert them into an array of same size, padded with 0 when needed
+            # if len(labels_1) > len(labels_2):
+            #     padding_needed = len(labels_1) - len(labels_2)
+            #     labels_2.extend([0]*padding_needed)
+            # elif len(labels_2) > len(labels_1):
+            #     padding_needed = len(labels_2) - len(labels_1)
+            #     labels_1.extend([0]*padding_needed)
+            
+            # labels_1_ls = []
+            # for value_1 in labels_1.values():
+            #     labels_1_ls.append(value_1)
+            # labels_1_array = np.array(labels_1_ls)
+
+            # labels_2_ls = []
+            # for value_2 in labels_2.values():
+            #     labels_2_ls.append(value_2)
+            # labels_2_array = np.array(labels_2_ls)     
+            
             costs = ot.dist(labels_1, labels_2, metric=ground_distance)
 
             if sinkhorn:
@@ -51,7 +70,7 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
     M = (M + M.T)
     return M
 
-def pairwise_wasserstein_distance(X, node_features = None, num_iterations=3, sinkhorn=False, enforce_continuous=False):
+def pairwise_wasserstein_distance(X, node_features = None, edge_weight=None, num_iterations=3, sinkhorn=False, enforce_continuous=False):
     """
     Pairwise computation of the Wasserstein distance between embeddings of the 
     graphs in X.
@@ -84,18 +103,18 @@ def pairwise_wasserstein_distance(X, node_features = None, num_iterations=3, sin
         node_representations = es.fit_transform(X, num_iterations=num_iterations)
     else:
         es = ContinuousWeisfeilerLehman()
-        node_representations = es.fit_transform(X, node_features=node_features, num_iterations=num_iterations)
+        node_representations = es.fit_transform(X, node_features=node_features, edge_weight=edge_weight, num_iterations=num_iterations)
 
     # Compute the Wasserstein distance
     pairwise_distances = _compute_wasserstein_distance(node_representations, sinkhorn=sinkhorn, 
                                     categorical=categorical, sinkhorn_lambda=1e-2)
     return pairwise_distances
 
-def wwl(X, node_features=None, num_iterations=3, sinkhorn=False, gamma=None):
+def wwl(X, node_features=None, edge_weight=None, num_iterations=3, sinkhorn=False, gamma=None):
     """
     Pairwise computation of the Wasserstein Weisfeiler-Lehman kernel for graphs in X.
     """
-    D_W =  pairwise_wasserstein_distance(X, node_features = node_features, 
+    D_W =  pairwise_wasserstein_distance(X, node_features = node_features, edge_weight=edge_weight,
                                 num_iterations=num_iterations, sinkhorn=sinkhorn)
     wwl = laplacian_kernel(D_W, gamma=gamma)
     return wwl
