@@ -58,6 +58,18 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
             
             costs = ot.dist(labels_1, labels_2, metric=ground_distance)
 
+            #--------------- print for debugging
+            if graph_index_1 == 0 and graph_index_2 == 1:
+                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            if graph_index_1 == 0 and graph_index_2 == 4:
+                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            if graph_index_1 == 0 and graph_index_2 == 5:
+                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            if graph_index_1 == 0 and graph_index_2 == 6:
+                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            #--------------- print for debugging
+
+            
             if sinkhorn:
                 mat = ot.sinkhorn(np.ones(len(labels_1))/len(labels_1), 
                                     np.ones(len(labels_2))/len(labels_2), costs, sinkhorn_lambda, 
@@ -65,8 +77,8 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
                 M[graph_index_1, graph_index_2 + graph_index_1] = np.sum(np.multiply(mat, costs))
             else:
                 M[graph_index_1, graph_index_2 + graph_index_1] = \
-                    ot.emd2([], [], costs)
-                    
+                    ot.emd2([], [], costs) # [], [] uniform weight if empty list
+            print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')                
     M = (M + M.T)
     return M
 

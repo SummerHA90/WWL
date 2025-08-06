@@ -216,8 +216,8 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
 
                         weight_prime_neigh_v = 0
                         for u in neigh_v:
-                            print(edge_weight[i])
-                            weight_prime_neigh_v += 1 / edge_weight[i][(int(X[i].vs[u]["_nx_name"]), int(v["_nx_name"]))] # since edge weight is a list of dict where the key is a tuple
+                            #print(edge_weight[i])
+                            weight_prime_neigh_v += 1 / edge_weight[i][(int(X[i].vs[u]["_nx_name"]), int(v["_nx_name"]))] # edge weight is a list of dict where the key is a tuple
 
                         sum_of_weighted_edge_neigh = 0
                         for u in neigh_v:
@@ -232,8 +232,14 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
                     graph_feat_dict.append(graph_feat_cur_dict)
                     graph_feat.append([graph_feat_cur_dict[key] for key in sorted(graph_feat_cur_dict.keys())])
 
-            print(graph_feat)
             self._label_sequences.append(np.transpose(graph_feat))
-            #print(self._label_sequences)
             #self._label_sequences.append(graph_feat) # this is a list of list of dict
+        
+            print(f'graph feature {i}: {graph_feat}') 
+        
+        print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
+        print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
+        print(f'graph index:{4}; node weight label:{self._label_sequences[4]}')
+        print(f'graph index:{5}; node weight label:{self._label_sequences[5]}')
+        print(f'graph index:{6}; node weight label:{self._label_sequences[6]}')
         return self._label_sequences
