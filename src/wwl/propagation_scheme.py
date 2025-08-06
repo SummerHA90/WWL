@@ -234,12 +234,25 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
 
             self._label_sequences.append(np.transpose(graph_feat))
             #self._label_sequences.append(graph_feat) # this is a list of list of dict
+
+        weighted_label_sequences = copy.deepcopy(self._label_sequences)
+        print(f'weighted_label_sequences: {weighted_label_sequences}') 
+
+        for i in range(n_graphs):
+            #print(f'i:{i}')
+            for index_r, row in enumerate(self._label_sequences[i]):
+                #print(f'row index and value:{index_r, row}')
+                for index_c, col in enumerate(row):
+                    #print(f'column index and value:{index_c, col}')
+                    value = col * (1/(index_c+1))
+                    #print(value)
+                    weighted_label_sequences[i][index_r][index_c] = value   
+        print(f'amended: {weighted_label_sequences}')
         
-            print(f'graph feature {i}: {graph_feat}') 
-        
-        print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
-        print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
-        print(f'graph index:{4}; node weight label:{self._label_sequences[4]}')
-        print(f'graph index:{5}; node weight label:{self._label_sequences[5]}')
-        print(f'graph index:{6}; node weight label:{self._label_sequences[6]}')
-        return self._label_sequences
+        #print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
+        #print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
+        #print(f'graph index:{4}; node weight label:{self._label_sequences[4]}')
+        #print(f'graph index:{5}; node weight label:{self._label_sequences[5]}')
+        #print(f'graph index:{6}; node weight label:{self._label_sequences[6]}')
+        #print(self._label_sequences)
+        return weighted_label_sequences
