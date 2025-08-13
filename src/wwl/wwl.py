@@ -59,14 +59,14 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
             costs = ot.dist(labels_1, labels_2, metric=ground_distance)
 
             #--------------- print for debugging
-            if graph_index_1 == 0 and graph_index_2 == 1:
-                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
-            if graph_index_1 == 0 and graph_index_2 == 4:
-                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
-            if graph_index_1 == 0 and graph_index_2 == 5:
-                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
-            if graph_index_1 == 0 and graph_index_2 == 6:
-                print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            #if graph_index_1 == 0 and graph_index_2 == 1:
+            #    print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            #if graph_index_1 == 0 and graph_index_2 == 4:
+            #    print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            #if graph_index_1 == 0 and graph_index_2 == 5:
+            #    print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
+            #if graph_index_1 == 0 and graph_index_2 == 6:
+            #    print(f'label 1: {labels_1}; label 2: {labels_2}; costs: {costs}')
             #--------------- print for debugging
 
             
@@ -78,7 +78,7 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
             else:
                 M[graph_index_1, graph_index_2 + graph_index_1] = \
                     ot.emd2([], [], costs) # [], [] uniform weight if empty list
-            #print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')                
+            print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')                
     M = (M + M.T)
     return M
 
@@ -120,16 +120,16 @@ def pairwise_wasserstein_distance(X, node_features = None, edge_weight=None, num
     # Compute the Wasserstein distance
     pairwise_distances = _compute_wasserstein_distance(node_representations, sinkhorn=sinkhorn, 
                                     categorical=categorical, sinkhorn_lambda=1e-2)
-    return pairwise_distances
+    return pairwise_distances, node_representations
 
 def wwl(X, node_features=None, edge_weight=None, num_iterations=3, sinkhorn=False, gamma=None):
     """
     Pairwise computation of the Wasserstein Weisfeiler-Lehman kernel for graphs in X.
     """
-    D_W =  pairwise_wasserstein_distance(X, node_features = node_features, edge_weight=edge_weight,
+    D_W, node_representations =  pairwise_wasserstein_distance(X, node_features = node_features, edge_weight=edge_weight,
                                 num_iterations=num_iterations, sinkhorn=sinkhorn)
     wwl = laplacian_kernel(D_W, gamma=gamma)
-    return wwl
+    return wwl, node_representations
 
 
 #######################
