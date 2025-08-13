@@ -236,7 +236,7 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
             #self._label_sequences.append(graph_feat) # this is a list of list of dict
 
         weighted_label_sequences = copy.deepcopy(self._label_sequences)
-        print(f'weighted_label_sequences: {weighted_label_sequences}') 
+        #print(f'weighted_label_sequences: {weighted_label_sequences}') 
 
         for i in range(n_graphs):
             #print(f'i:{i}')
@@ -247,7 +247,7 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
                     value = col * (1/(index_c+1))
                     #print(value)
                     weighted_label_sequences[i][index_r][index_c] = value   
-        print(f'amended: {weighted_label_sequences}')
+        #print(f'amended: {weighted_label_sequences}')
         
         #print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
         #print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
