@@ -19,7 +19,7 @@ def logging_config(level='DEBUG'):
     logging.basicConfig(level=level)
     pass
 
-def _compute_wasserstein_distance(label_sequences, sinkhorn=False, 
+def _compute_wasserstein_distance(label_sequences, g_vertex_deg_ls, total_g_deg, sinkhorn=False, 
                                     categorical=False, sinkhorn_lambda=1e-2):
     '''
     Generate the Wasserstein distance matrix for the graphs embedded 
@@ -76,8 +76,14 @@ def _compute_wasserstein_distance(label_sequences, sinkhorn=False,
                                     numItermax=50)
                 M[graph_index_1, graph_index_2 + graph_index_1] = np.sum(np.multiply(mat, costs))
             else:
+                # list of weights determined by deg(u)/deg of total (number of edges)
+                weight_g1 = np.array(g_vertex_deg_ls[graph_index_1]) / total_g_deg[graph_index_1]
+                #print(f"g1: {weight_g1}")
+                weight_g2 = np.array(g_vertex_deg_ls[graph_index_2+graph_index_1]) / total_g_deg[graph_index_2+graph_index_1]
+                #print(f"g2: {weight_g1}")
                 M[graph_index_1, graph_index_2 + graph_index_1] = \
-                    ot.emd2([], [], costs) # [], [] uniform weight if empty list
+                    ot.emd2(weight_g1, weight_g2, costs)
+                    # ot.emd2([], [], costs) # [], [] uniform weight if empty list
             print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')                
     M = (M + M.T)
     return M
@@ -115,10 +121,10 @@ def pairwise_wasserstein_distance(X, node_features = None, edge_weight=None, num
         node_representations = es.fit_transform(X, num_iterations=num_iterations)
     else:
         es = ContinuousWeisfeilerLehman()
-        node_representations = es.fit_transform(X, node_features=node_features, edge_weight=edge_weight, num_iterations=num_iterations)
+        node_representations, g_vertex_deg_ls, total_g_deg = es.fit_transform(X, node_features=node_features, edge_weight=edge_weight, num_iterations=num_iterations)
 
     # Compute the Wasserstein distance
-    pairwise_distances = _compute_wasserstein_distance(node_representations, sinkhorn=sinkhorn, 
+    pairwise_distances = _compute_wasserstein_distance(node_representations, g_vertex_deg_ls, total_g_deg, sinkhorn=sinkhorn, 
                                     categorical=categorical, sinkhorn_lambda=1e-2)
     return pairwise_distances, node_representations
 

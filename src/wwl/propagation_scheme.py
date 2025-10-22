@@ -248,6 +248,26 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
                     #print(value)
                     weighted_label_sequences[i][index_r][index_c] = value   
         #print(f'amended: {weighted_label_sequences}')
+
+        g_vertex_deg_ls = []
+        total_g_deg = []
+        
+        for i in X:
+            sorted_vertices = sorted(i.vs, key=lambda v : v["_nx_name"])
+            degrees = [v.degree() for v in sorted_vertices]
+            # before_sort = i.vs["_nx_name"]
+            # degrees = [None]*len(before_sort)
+            # after_sort = sorted(before_sort)
+            # #print(before_sort)
+            # #print(after_sort)
+            # #print(weighted_label_seq)
+            # for sorted_i in range(len(after_sort)):
+            #     index = before_sort.index(after_sort[sorted_i])
+            #     degrees[index] = i.vs.degree()[sorted_i]
+            g_vertex_deg_ls.append(degrees) # list of list
+            total_g_deg.append(sum(degrees))  # list of integer, each integer corresponds to each graph
+
+        print(f"vertex deg: {g_vertex_deg_ls}; total deg: {total_g_deg}")
         
         #print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
         #print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
@@ -255,4 +275,4 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
         #print(f'graph index:{5}; node weight label:{self._label_sequences[5]}')
         #print(f'graph index:{6}; node weight label:{self._label_sequences[6]}')
         #print(self._label_sequences)
-        return weighted_label_sequences
+        return weighted_label_sequences, g_vertex_deg_ls, total_g_deg
