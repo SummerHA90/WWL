@@ -84,7 +84,8 @@ def _compute_wasserstein_distance(label_sequences, g_vertex_deg_ls, total_g_deg,
                 M[graph_index_1, graph_index_2 + graph_index_1] = \
                     ot.emd2(weight_g1, weight_g2, costs)
                     # ot.emd2([], [], costs) # [], [] uniform weight if empty list
-            print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')                
+            #print(f'g1:{graph_index_1},g2:{graph_index_2+graph_index_1},distance:{M[graph_index_1, graph_index_2 + graph_index_1]}')
+        print(f'g1:{graph_index_1}')      
     M = (M + M.T)
     return M
 

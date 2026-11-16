@@ -267,7 +267,7 @@ class ContinuousWeisfeilerLehman(TransformerMixin):
             g_vertex_deg_ls.append(degrees) # list of list
             total_g_deg.append(sum(degrees))  # list of integer, each integer corresponds to each graph
 
-        print(f"vertex deg: {g_vertex_deg_ls}; total deg: {total_g_deg}")
+        #print(f"vertex deg: {g_vertex_deg_ls}; total deg: {total_g_deg}")
         
         #print(f'graph index:{0}; node weight label:{self._label_sequences[0]}')
         #print(f'graph index:{1}; node weight label:{self._label_sequences[1]}')
